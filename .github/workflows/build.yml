@@ -1,0 +1,24 @@
+name: Build APK
+on: [push, workflow_dispatch]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: unzip -q Offroad4x4Hills_AndroidStudio.zip
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.7
+      - run: keytool -genkeypair -keystore OffroadApp/app/release.jks -storepass offroad123 -keypass offroad123 -alias key0 -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Offroad, O=Saim Studio, C=PK"
+      - run: gradle assembleRelease
+        working-directory: OffroadApp
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Offroad-APK
+          path: |
+            OffroadApp/app/build/outputs/apk/release/*.apk
+            OffroadApp/app/release.jks
